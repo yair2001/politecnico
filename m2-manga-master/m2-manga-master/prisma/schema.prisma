@@ -1,0 +1,67 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model customers {
+  id_user   Int      @id @default(autoincrement())
+  username  String
+  Password  String
+  Email     String   @unique
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  owner     owner[]
+}
+
+model role {
+  id_role   Int      @id @default(autoincrement())
+  role_name String   @unique
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  owner     owner[]
+}
+
+model cover {
+  id_cover   Int       @id @default(autoincrement())
+  cover_url  String
+  banner_url String?
+  content    content[]
+}
+
+model content {
+  id_content       Int        @id @default(autoincrement())
+  producer         String?
+  name_content     String     @unique
+  alternative_name String?
+  type_content     String
+  descripcion_name String
+  status           statusEnum
+  createdAt        DateTime   @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime   @updatedAt @db.Timestamptz(3)
+  cover_fk         Int
+  cover            cover      @relation(fields: [cover_fk], references: [id_cover])
+}
+
+model owner {
+  id_owner    Int       @id @default(autoincrement())
+  customer_id Int
+  role_id     Int
+  createdAt   DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime  @updatedAt @db.Timestamptz(3)
+  customer    customers @relation(fields: [customer_id], references: [id_user])
+  role        role      @relation(fields: [role_id], references: [id_role])
+}
+
+enum statusEnum {
+  IN_STREAMING
+  CANCELED
+  FINISHED
+  HIDDEN
+}
